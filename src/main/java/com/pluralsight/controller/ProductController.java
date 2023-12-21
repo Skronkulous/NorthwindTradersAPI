@@ -19,14 +19,8 @@ public class ProductController {
     }
 
     @GetMapping(path="/product/pID/{pID}")
-    public List<Product> getProductByProductId(@PathVariable int pID){
-        List<Product> chosenProduct = new ArrayList<>();
-        for(Product p: productService.allProducts()){
-            if(p.getProductID() == pID){
-                chosenProduct.add(p);
-            }
-        }
-        return chosenProduct;
+    public Product getProductByProductId(@PathVariable int pID){
+        return productService.productById(pID);
     }
 
     @GetMapping(path="/product/name/{name}")

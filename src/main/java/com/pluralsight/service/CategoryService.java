@@ -5,6 +5,7 @@ import com.pluralsight.model.Category;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.sql.SQLException;
 import java.util.List;
 
 @Component
@@ -15,7 +16,11 @@ public class CategoryService {
         this.categoryDAO = categoryDAOImpl;
     }
 
-    public List<Category> allCategories(){
+    public List<Category> allCategories() throws SQLException {
         return categoryDAO.allCategories();
+    }
+
+    public Category categoryById(int id){
+        return categoryDAO.findByCategoryId(id);
     }
 }

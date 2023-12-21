@@ -1,8 +1,15 @@
 package com.pluralsight.dao;
 
 import com.pluralsight.model.Category;
+import com.pluralsight.model.Product;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -10,21 +17,52 @@ import java.util.Map;
 
 @Component
 public class CategoryDAOImpl implements CategoryDAO{
+    private DataSource dataSource;
     private final Map<Integer, Category> categories = new HashMap<>();
 
-    public CategoryDAOImpl() {
-        categories.put(1, new Category(1, "Meat"));
-        categories.put(2, new Category(2, "Cheese"));
-        categories.put(3, new Category(3, "Beverage"));
-        categories.put(4, new Category(4, "Candy"));
-        categories.put(5, new Category(5, "Fruit"));
-        categories.put(6, new Category(6, "Vegetable"));
-        categories.put(7, new Category(7, "Grain"));
-        categories.put(8, new Category(8, "Spirits"));
+    @Autowired
+    public CategoryDAOImpl(DataSource dataSource) {
+        this.dataSource = dataSource;
     }
 
     @Override
-    public List<Category> allCategories() {
-        return new ArrayList<>(categories.values());
+    public List<Category> allCategories(){
+        List<Category> categories = new ArrayList<>();
+        String query = "SELECT * FROM categories";
+        try(Connection conn = dataSource.getConnection()){
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(query);
+            System.out.println("* CONNECTED *");
+            while(rs.next()){
+                Category category = new Category();
+                category.setCategoryId(Integer.parseInt(rs.getString("CategoryID")));
+                category.setCategoryName(rs.getString("CategoryName"));
+                category.setDescription(rs.getString("Description"));
+                categories.add(category);
+            }
+        }
+        catch(Exception e){
+            throw new RuntimeException(e);
+        }
+        return categories;
+    }
+
+    @Override
+    public Category findByCategoryId(int id) {
+        String query = "SELECT * FROM categories WHERE CategoryID = " + id;
+        Category category = new Category();
+        try(Connection conn = dataSource.getConnection()) {
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(query);
+            while(rs.next()){
+                category.setCategoryId(Integer.parseInt(rs.getString("CategoryID")));
+                category.setCategoryName((rs.getString("CategoryName")));
+                category.setDescription(rs.getString("Description"));
+            }
+        }
+        catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return category;
     }
 }
